@@ -1,0 +1,849 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mayo Clinic — Ambient Clinical Documentation</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --mayo-navy:#00467F;
+  --mayo-blue:#0076C0;
+  --mayo-light:#E8F4FD;
+  --mayo-mid:#B8D9F0;
+  --white:#FFFFFF;
+  --gray-50:#F8F9FA;
+  --gray-100:#F0F2F4;
+  --gray-200:#E2E6EA;
+  --gray-400:#9AA3AD;
+  --gray-600:#5A6472;
+  --gray-800:#2D3748;
+  --text:#1A202C;
+  --green:#1A6B3C;
+  --green-bg:#E8F5EE;
+  --amber:#7A4F00;
+  --amber-bg:#FEF3E2;
+  --red:#8B1A1A;
+  --red-bg:#FEE8E8;
+  --radius:6px;
+  --radius-lg:10px;
+  --shadow:0 1px 3px rgba(0,0,0,0.08),0 1px 2px rgba(0,0,0,0.04);
+}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;background:var(--gray-100);color:var(--text);min-height:100vh;font-size:14px}
+
+/* ── Header ── */
+.header{background:var(--mayo-navy);color:var(--white);padding:0 24px;height:58px;display:flex;align-items:center;justify-content:space-between;box-shadow:0 2px 4px rgba(0,0,0,0.2)}
+.header-left{display:flex;align-items:center;gap:16px}
+.mayo-logo{display:flex;align-items:center;gap:10px}
+.mayo-shield{width:36px;height:36px;background:var(--white);border-radius:4px;display:flex;align-items:center;justify-content:center}
+.mayo-shield svg{width:24px;height:24px}
+.mayo-wordmark{display:flex;flex-direction:column;line-height:1.1}
+.mayo-name{font-size:16px;font-weight:700;letter-spacing:0.02em;color:var(--white)}
+.mayo-sub{font-size:10px;color:var(--mayo-mid);letter-spacing:0.06em;text-transform:uppercase}
+.header-divider{width:1px;height:28px;background:rgba(255,255,255,0.2)}
+.header-title{font-size:13px;color:rgba(255,255,255,0.85);font-weight:400}
+.header-right{display:flex;align-items:center;gap:10px}
+.enc-pill{font-size:11px;padding:3px 10px;border-radius:99px;background:rgba(255,255,255,0.15);color:rgba(255,255,255,0.9)}
+.status-pill{font-size:11px;font-weight:600;padding:3px 10px;border-radius:99px}
+.s-active{background:var(--mayo-light);color:var(--mayo-navy)}
+.s-draft{background:var(--amber-bg);color:var(--amber)}
+.s-done{background:var(--green-bg);color:var(--green)}
+
+/* ── Nav ── */
+.nav{background:var(--white);border-bottom:1px solid var(--gray-200);display:flex;padding:0 24px;gap:2px}
+.tab{padding:13px 18px;font-size:13px;color:var(--gray-600);cursor:pointer;border-bottom:3px solid transparent;margin-bottom:-1px;transition:all 0.15s;font-weight:500;white-space:nowrap}
+.tab:hover{color:var(--mayo-navy)}
+.tab.active{color:var(--mayo-navy);border-bottom-color:var(--mayo-blue)}
+.tab-badge{font-size:10px;padding:1px 6px;border-radius:99px;background:var(--gray-100);color:var(--gray-600);margin-left:5px;font-weight:400}
+.tab.active .tab-badge{background:var(--mayo-light);color:var(--mayo-navy)}
+
+/* ── Layout ── */
+.main{max-width:1000px;margin:0 auto;padding:20px 24px}
+.panel{display:none}
+.panel.visible{display:block}
+
+/* ── Cards ── */
+.card{background:var(--white);border:1px solid var(--gray-200);border-radius:var(--radius-lg);padding:18px 20px;margin-bottom:14px;box-shadow:var(--shadow)}
+.card-head{font-size:13px;font-weight:600;color:var(--mayo-navy);margin-bottom:14px;display:flex;align-items:center;gap:8px}
+.card-head-icon{width:20px;height:20px;border-radius:4px;background:var(--mayo-light);display:flex;align-items:center;justify-content:center}
+.card-head-icon svg{width:12px;height:12px;fill:var(--mayo-navy)}
+
+/* ── Forms ── */
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px}
+.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:14px}
+.grid4{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-bottom:14px}
+.full{grid-column:1/-1}
+.field{display:flex;flex-direction:column;gap:4px}
+.field label{font-size:11px;font-weight:600;color:var(--gray-600);text-transform:uppercase;letter-spacing:0.05em}
+.field input,.field select,.field textarea{font-family:inherit;font-size:13px;color:var(--text);background:var(--white);border:1px solid var(--gray-200);border-radius:var(--radius);padding:8px 10px;width:100%;transition:border-color 0.15s}
+.field input:focus,.field select:focus,.field textarea:focus{outline:none;border-color:var(--mayo-blue);box-shadow:0 0 0 3px rgba(0,118,192,0.1)}
+.field input[readonly]{background:var(--gray-50);color:var(--gray-600)}
+.field textarea{resize:vertical;line-height:1.6}
+
+/* ── Section label ── */
+.slabel{font-size:10px;font-weight:700;color:var(--gray-400);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:8px}
+
+/* ── Chips ── */
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px}
+.chip{display:inline-flex;align-items:center;gap:5px;padding:5px 12px;border-radius:99px;border:1px solid var(--gray-200);font-size:12px;color:var(--gray-600);cursor:pointer;transition:all 0.15s;background:var(--white)}
+.chip:hover{border-color:var(--mayo-blue);color:var(--mayo-navy)}
+.chip.sel{background:var(--mayo-light);border-color:var(--mayo-blue);color:var(--mayo-navy);font-weight:500}
+.chip-dot{width:6px;height:6px;border-radius:50%;background:currentColor;opacity:0.5}
+.chip.sel .chip-dot{opacity:1}
+
+/* ── Buttons ── */
+.btn{padding:8px 18px;border-radius:var(--radius);border:1px solid var(--gray-200);background:var(--white);font-size:13px;font-family:inherit;color:var(--text);cursor:pointer;font-weight:500;transition:all 0.15s}
+.btn:hover{background:var(--gray-50);border-color:var(--gray-400)}
+.btn:active{transform:scale(0.98)}
+.btn:disabled{opacity:0.4;cursor:not-allowed}
+.btn-primary{background:var(--mayo-blue);border-color:var(--mayo-blue);color:var(--white)}
+.btn-primary:hover{background:var(--mayo-navy);border-color:var(--mayo-navy)}
+.btn-navy{background:var(--mayo-navy);border-color:var(--mayo-navy);color:var(--white)}
+.btn-navy:hover{background:#003460}
+.btn-success{background:var(--green);border-color:var(--green);color:var(--white)}
+.btn-success:hover{background:#145530}
+.btn-row{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:16px}
+
+/* ── Alerts ── */
+.alert{border-radius:var(--radius);padding:10px 14px;font-size:12px;line-height:1.6;margin-bottom:14px;display:flex;gap:8px;align-items:flex-start}
+.alert svg{width:14px;height:14px;flex-shrink:0;margin-top:1px}
+.alert-info{background:var(--mayo-light);color:var(--mayo-navy);border:1px solid var(--mayo-mid)}
+.alert-warn{background:var(--amber-bg);color:var(--amber);border:1px solid #F5C97A}
+.alert-demo{background:#FFF8E1;color:#7A4F00;border:1px solid #F5C97A;font-size:11px}
+
+/* ── Mode tabs ── */
+.mode-tabs{display:flex;gap:6px;margin-bottom:14px;flex-wrap:wrap}
+.mode-tab{padding:6px 14px;border-radius:var(--radius);border:1px solid var(--gray-200);font-size:12px;font-weight:500;color:var(--gray-600);cursor:pointer;background:var(--white);transition:all 0.15s}
+.mode-tab:hover{border-color:var(--mayo-blue);color:var(--mayo-navy)}
+.mode-tab.active{background:var(--mayo-navy);border-color:var(--mayo-navy);color:var(--white)}
+
+/* ── Record area ── */
+.rec-area{border:1px solid var(--gray-200);border-radius:var(--radius-lg);padding:24px;text-align:center;margin-bottom:14px;background:var(--gray-50)}
+.rec-btn{width:58px;height:58px;border-radius:50%;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;margin:0 auto 12px;transition:all 0.2s}
+.rec-idle{background:var(--mayo-light);color:var(--mayo-navy)}
+.rec-idle:hover{background:var(--mayo-mid)}
+.rec-live{background:var(--red-bg);color:var(--red);animation:rpulse 1.2s infinite}
+@keyframes rpulse{0%,100%{opacity:1}50%{opacity:0.5}}
+.rec-timer{font-size:24px;font-weight:600;font-family:'SF Mono',monospace;color:var(--mayo-navy);margin-bottom:6px}
+.rec-status{font-size:12px;color:var(--gray-600);margin-bottom:12px}
+.wave{display:flex;align-items:center;justify-content:center;gap:3px;height:32px;margin-bottom:8px}
+.wbar{width:3px;border-radius:2px;background:var(--mayo-blue);transition:height 0.12s}
+
+/* ── Upload zone ── */
+.upload-zone{border:1px dashed var(--gray-400);border-radius:var(--radius-lg);padding:28px;text-align:center;cursor:pointer;transition:all 0.2s;margin-bottom:14px;background:var(--gray-50)}
+.upload-zone:hover{background:var(--mayo-light);border-color:var(--mayo-blue)}
+.upload-icon{width:40px;height:40px;border-radius:50%;background:var(--mayo-light);display:flex;align-items:center;justify-content:center;margin:0 auto 10px}
+
+/* ── Pipeline ── */
+.pipeline{display:flex;border:1px solid var(--gray-200);border-radius:var(--radius);overflow:hidden;margin-bottom:14px}
+.p-stage{flex:1;padding:9px 4px;text-align:center;font-size:11px;font-weight:500;color:var(--gray-400);border-right:1px solid var(--gray-200);transition:all 0.3s}
+.p-stage:last-child{border-right:none}
+.p-stage.active{background:var(--mayo-light);color:var(--mayo-navy)}
+.p-stage.done{background:var(--green-bg);color:var(--green)}
+
+/* ── Entity tags ── */
+.etags{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:12px}
+.etag{display:inline-block;padding:3px 10px;border-radius:99px;font-size:11px;font-weight:600}
+.etag-dx{background:var(--mayo-light);color:var(--mayo-navy)}
+.etag-sx{background:var(--green-bg);color:var(--green)}
+.etag-neg{background:var(--gray-100);color:var(--gray-600)}
+.etag-med{background:var(--amber-bg);color:var(--amber)}
+.etag-all{background:var(--red-bg);color:var(--red)}
+.etag-vit{background:#F0E6FF;color:#5B21B6}
+
+/* ── Metrics ── */
+.metrics{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-bottom:16px}
+.m-card{background:var(--gray-50);border:1px solid var(--gray-200);border-radius:var(--radius-lg);padding:14px;text-align:center}
+.m-val{font-size:22px;font-weight:700;color:var(--mayo-navy)}
+.m-lbl{font-size:11px;color:var(--gray-600);margin-top:3px}
+
+/* ── SOAP note ── */
+.note-block{margin-bottom:14px}
+.note-head{font-size:11px;font-weight:700;color:var(--mayo-navy);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:5px;display:flex;align-items:center;gap:8px}
+.note-head-bar{width:3px;height:14px;background:var(--mayo-blue);border-radius:2px}
+.rbadge{font-size:10px;padding:2px 7px;border-radius:99px;background:var(--amber-bg);color:var(--amber);font-weight:600;text-transform:none;letter-spacing:0}
+.note-text{font-size:13px;color:var(--text);line-height:1.7;border:1px solid var(--gray-200);border-radius:var(--radius);padding:10px 12px;background:var(--white);min-height:46px}
+.note-text[contenteditable=true]:hover{border-color:var(--gray-400)}
+.note-text[contenteditable=true]:focus{outline:none;border-color:var(--mayo-blue);box-shadow:0 0 0 3px rgba(0,118,192,0.1)}
+
+/* ── Sign box ── */
+.sig-box{border:1px solid var(--gray-200);border-radius:var(--radius-lg);padding:16px 20px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;background:var(--gray-50)}
+.sig-name{font-size:14px;font-weight:600;color:var(--mayo-navy)}
+.sig-sub{font-size:12px;color:var(--gray-600);margin-top:2px}
+.signed-stamp{font-size:12px;font-weight:600;padding:5px 16px;border-radius:99px;background:var(--green-bg);color:var(--green);border:1px solid #A7D7BB}
+
+/* ── Passport ── */
+.passport-card{background:var(--white);border:1px solid var(--gray-200);border-radius:var(--radius-lg);overflow:hidden;box-shadow:var(--shadow);margin-bottom:14px}
+.passport-header{background:var(--mayo-navy);padding:16px 20px;display:flex;align-items:center;gap:14px}
+.passport-avatar{width:48px;height:48px;border-radius:50%;background:rgba(255,255,255,0.2);display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:700;color:var(--white);flex-shrink:0}
+.passport-name{font-size:16px;font-weight:700;color:var(--white)}
+.passport-meta{font-size:12px;color:rgba(255,255,255,0.75);margin-top:2px}
+.passport-body{padding:18px 20px}
+.passport-section{margin-bottom:16px}
+.passport-section:last-child{margin-bottom:0}
+
+/* ── Share code ── */
+.share-box{background:var(--mayo-light);border:1px solid var(--mayo-mid);border-radius:var(--radius-lg);padding:16px 20px;text-align:center;margin-bottom:14px}
+.share-code{font-size:32px;font-weight:700;letter-spacing:0.25em;color:var(--mayo-navy);font-family:'SF Mono',monospace;margin:8px 0}
+.share-sub{font-size:11px;color:var(--gray-600)}
+
+/* ── History rows ── */
+.hist-row{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--gray-100);font-size:13px;flex-wrap:wrap}
+.hist-row:last-child{border-bottom:none}
+.hist-date{font-size:11px;color:var(--gray-400);min-width:90px;font-weight:500}
+.hist-type{font-size:11px;font-weight:600;padding:2px 9px;border-radius:99px;background:var(--mayo-light);color:var(--mayo-navy)}
+.hist-detail{flex:1;color:var(--text);padding:0 8px;font-size:12px}
+.hist-dr{font-size:11px;color:var(--gray-400);font-weight:500}
+
+/* ── Spinner ── */
+.spinner{display:inline-block;width:14px;height:14px;border:2px solid var(--gray-200);border-top-color:var(--mayo-blue);border-radius:50%;animation:spin 0.7s linear infinite;vertical-align:middle}
+@keyframes spin{to{transform:rotate(360deg)}}
+.status-msg{font-size:12px;color:var(--gray-600)}
+
+/* ── Divider ── */
+.divider{height:1px;background:var(--gray-200);margin:16px 0}
+
+/* ── Footer ── */
+.footer{text-align:center;font-size:11px;color:var(--gray-400);padding:20px;border-top:1px solid var(--gray-200);background:var(--white);margin-top:24px}
+.footer strong{color:var(--mayo-navy)}
+
+@media(max-width:640px){
+  .grid2,.grid3,.grid4,.metrics{grid-template-columns:1fr 1fr}
+  .main{padding:14px 16px}
+  .header{padding:0 16px}
+  .nav{padding:0 8px}
+  .tab{padding:12px 10px;font-size:12px}
+  .enc-pill,.header-divider,.header-title{display:none}
+}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="header">
+  <div class="header-left">
+    <div class="mayo-logo">
+      <div class="mayo-shield">
+        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M12 2L4 6v6c0 5 3.5 9.7 8 11 4.5-1.3 8-6 8-11V6L12 2z" fill="#00467F"/>
+          <path d="M10 7h4v3h3v4h-3v3h-4v-3H7v-4h3V7z" fill="white"/>
+        </svg>
+      </div>
+      <div class="mayo-wordmark">
+        <div class="mayo-name">Mayo Clinic</div>
+        <div class="mayo-sub">Ambient Documentation</div>
+      </div>
+    </div>
+    <div class="header-divider"></div>
+    <div class="header-title">Clinical Scribe System</div>
+  </div>
+  <div class="header-right">
+    <span class="enc-pill">ENC-2026-<span id="encNum">0847</span></span>
+    <span class="enc-pill" id="topDate"></span>
+    <span class="status-pill s-active" id="encStatus">In progress</span>
+  </div>
+</div>
+
+<!-- NAV -->
+<div class="nav">
+  <div class="tab active" onclick="switchTab('intake')">Patient intake</div>
+  <div class="tab" onclick="switchTab('scribe')">Live scribe</div>
+  <div class="tab" onclick="switchTab('note')">Note &amp; review <span class="tab-badge" id="noteBadge">pending</span></div>
+  <div class="tab" onclick="switchTab('passport')">Medical passport</div>
+  <div class="tab" onclick="switchTab('history')">Encounter history</div>
+</div>
+
+<div class="main">
+
+<!-- ══════════════════════════════════════════
+     INTAKE
+══════════════════════════════════════════ -->
+<div id="tab-intake" class="panel visible">
+  <div class="alert alert-demo">
+    <svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 1a7 7 0 100 14A7 7 0 008 1zm0 2a5 5 0 110 10A5 5 0 018 3zm-.75 2.75v2.5h1.5v-2.5h-1.5zm0 3.5v1.5h1.5v-1.5h-1.5z"/></svg>
+    Prototype — demonstration mode only. Do not enter real patient data.
+  </div>
+
+  <div class="card">
+    <div class="card-head">
+      <div class="card-head-icon"><svg viewBox="0 0 16 16"><path d="M8 8a3 3 0 100-6 3 3 0 000 6zm-5 6a5 5 0 0110 0H3z"/></svg></div>
+      Patient demographics
+    </div>
+    <div class="grid3">
+      <div class="field"><label>First name</label><input id="ptFirst" value="James"></div>
+      <div class="field"><label>Last name</label><input id="ptLast" value="Mitchell"></div>
+      <div class="field"><label>Date of birth</label><input type="date" id="ptDob" value="1958-09-14"></div>
+      <div class="field"><label>Gender</label>
+        <select id="ptGender"><option>Male</option><option>Female</option><option>Non-binary</option><option>Prefer not to say</option></select>
+      </div>
+      <div class="field"><label>Patient MRN</label><input id="ptId" value="MRN-447821"></div>
+      <div class="field"><label>Encounter type</label>
+        <select id="encType"><option>Follow-up</option><option>New patient</option><option>Urgent</option><option>Telemedicine</option><option>Pre-operative</option></select>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-head">
+      <div class="card-head-icon"><svg viewBox="0 0 16 16"><path d="M8 1a7 7 0 100 14A7 7 0 008 1zm1 10H7V7h2v4zm0-5H7V4h2v2z"/></svg></div>
+      Encounter details
+    </div>
+    <div class="grid3">
+      <div class="field"><label>Specialty</label>
+        <select id="specialty">
+          <option>General practice</option>
+          <option>Cardiology</option>
+          <option>Endocrinology</option>
+          <option>Respiratory medicine</option>
+          <option>Neurology</option>
+          <option>Orthopaedics</option>
+          <option>Oncology</option>
+          <option>Gastroenterology</option>
+          <option>Nephrology</option>
+        </select>
+      </div>
+      <div class="field"><label>Attending physician</label><input id="clinician" value="Dr. Sarah Chen, MD"></div>
+      <div class="field"><label>Department</label>
+        <select id="dept">
+          <option>Mayo Clinic — Rochester, MN</option>
+          <option>Mayo Clinic — Phoenix, AZ</option>
+          <option>Mayo Clinic — Jacksonville, FL</option>
+        </select>
+      </div>
+      <div class="field full"><label>Chief complaint</label><input id="complaint" value="Fatigue, elevated blood pressure and occasional headaches"></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-head">
+      <div class="card-head-icon"><svg viewBox="0 0 16 16"><path d="M2 4h12v1H2zm0 3h12v1H2zm0 3h8v1H2z"/></svg></div>
+      Active medical conditions
+    </div>
+    <div class="chips" id="condChips">
+      <div class="chip sel" onclick="this.classList.toggle('sel')"><div class="chip-dot"></div>Hypertension</div>
+      <div class="chip" onclick="this.classList.toggle('sel')"><div class="chip-dot"></div>Type 2 diabetes mellitus</div>
+      <div class="chip sel" onclick="this.classList.toggle('sel')"><div class="chip-dot"></div>Hyperlipidaemia</div>
+      <div class="chip" onclick="this.classList.toggle('sel')"><div class="chip-dot"></div>Coronary artery disease</div>
+      <div class="chip" onclick="this.classList.toggle('sel')"><div class="chip-dot"></div>Chronic kidney disease</div>
+      <div class="chip" onclick="this.classList.toggle('sel')"><div class="chip-dot"></div>Asthma / COPD</div>
+      <div class="chip" onclick="this.classList.toggle('sel')"><div class="chip-dot"></div>Atrial fibrillation</div>
+      <div class="chip" onclick="this.classList.toggle('sel')"><div class="chip-dot"></div>Depression / anxiety</div>
+      <div class="chip" onclick="this.classList.toggle('sel')"><div class="chip-dot"></div>Hypothyroidism</div>
+      <div class="chip" onclick="this.classList.toggle('sel')"><div class="chip-dot"></div>Obesity (BMI &gt;30)</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-head">
+      <div class="card-head-icon"><svg viewBox="0 0 16 16"><path d="M6 1h4v2h3v11H3V3h3V1zm1 1v1h2V2H7zm-3 2v9h8V4H4zm2 2h4v1H6V6zm0 2h4v1H6V8zm0 2h2v1H6v-1z"/></svg></div>
+      Medications &amp; allergies
+    </div>
+    <div class="grid2">
+      <div class="field"><label>Current medications (one per line)</label>
+        <textarea id="meds" rows="4">Amlodipine 5mg once daily
+Atorvastatin 40mg once daily
+Lisinopril 10mg once daily</textarea>
+      </div>
+      <div class="field"><label>Known drug allergies</label>
+        <textarea id="allergies" rows="4">Penicillin — rash
+No other known drug allergies</textarea>
+      </div>
+    </div>
+  </div>
+
+  <div class="btn-row">
+    <button class="btn btn-primary" onclick="switchTab('scribe')">Begin encounter →</button>
+    <button class="btn" onclick="switchTab('passport')">View medical passport</button>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     SCRIBE
+══════════════════════════════════════════ -->
+<div id="tab-scribe" class="panel">
+  <div class="mode-tabs">
+    <div class="mode-tab active" id="mt-mic" onclick="setMode('mic')">Microphone</div>
+    <div class="mode-tab" id="mt-upload" onclick="setMode('upload')">Upload audio</div>
+    <div class="mode-tab" id="mt-text" onclick="setMode('text')">Type / paste dialogue</div>
+  </div>
+
+  <!-- MIC MODE -->
+  <div id="mp-mic">
+    <div class="rec-area">
+      <div class="wave" id="waveform">
+        <div class="wbar" style="height:8px" id="w1"></div><div class="wbar" style="height:16px" id="w2"></div>
+        <div class="wbar" style="height:6px" id="w3"></div><div class="wbar" style="height:22px" id="w4"></div>
+        <div class="wbar" style="height:10px" id="w5"></div><div class="wbar" style="height:28px" id="w6"></div>
+        <div class="wbar" style="height:8px" id="w7"></div><div class="wbar" style="height:18px" id="w8"></div>
+        <div class="wbar" style="height:12px" id="w9"></div><div class="wbar" style="height:24px" id="w10"></div>
+        <div class="wbar" style="height:8px" id="w11"></div>
+      </div>
+      <div class="rec-timer" id="recTimer">00:00</div>
+      <div class="rec-status" id="recStatus">Press record to begin capturing the clinical encounter</div>
+      <button class="rec-btn rec-idle" id="recBtn" onclick="toggleRec()">
+        <svg width="22" height="22" viewBox="0 0 22 22" fill="currentColor"><circle cx="11" cy="11" r="8"/></svg>
+      </button>
+    </div>
+    <div class="field">
+      <label>Live transcript — auto-filled while recording, or edit manually before generating</label>
+      <textarea id="micTranscript" rows="8" placeholder="Transcript appears here in real time as you speak. You can also type or paste dialogue directly."></textarea>
+    </div>
+  </div>
+
+  <!-- UPLOAD MODE -->
+  <div id="mp-upload" style="display:none">
+    <div class="upload-zone" onclick="document.getElementById('audioFile').click()">
+      <div class="upload-icon">
+        <svg width="20" height="20" viewBox="0 0 20 20" fill="#00467F"><path d="M10 2L6 6h3v8h2V6h3L10 2zM3 16h14v2H3v-2z"/></svg>
+      </div>
+      <div style="font-size:13px;color:var(--gray-600);font-weight:500">Click to upload encounter audio</div>
+      <div style="font-size:11px;color:var(--gray-400);margin-top:4px">MP3, WAV, M4A — max 25MB</div>
+      <input type="file" id="audioFile" accept="audio/*" style="display:none" onchange="handleUpload(this)">
+    </div>
+    <div id="uploadMsg" style="font-size:12px;color:var(--gray-600);margin-bottom:12px"></div>
+    <div class="field">
+      <label>Transcript — paste after upload, then generate note</label>
+      <textarea id="uploadTranscript" rows="8" placeholder="Paste the encounter transcript here."></textarea>
+    </div>
+  </div>
+
+  <!-- TEXT MODE -->
+  <div id="mp-text" style="display:none">
+    <div class="alert alert-info">
+      <svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 1a7 7 0 100 14A7 7 0 008 1zm0 2a5 5 0 110 10A5 5 0 018 3zm-.75 2.75v2.5h1.5v-2.5h-1.5zm0 3.5v1.5h1.5v-1.5h-1.5z"/></svg>
+      Label speaker turns as <strong>Clinician:</strong> and <strong>Patient:</strong> for best NLP extraction results.
+    </div>
+    <div class="chips" style="margin-bottom:12px">
+      <div class="chip sel" id="pre-htn" onclick="loadPreset('htn')"><div class="chip-dot"></div>Hypertension follow-up</div>
+      <div class="chip" id="pre-dm" onclick="loadPreset('dm')"><div class="chip-dot"></div>Diabetes review</div>
+      <div class="chip" id="pre-cp" onclick="loadPreset('cp')"><div class="chip-dot"></div>Chest pain evaluation</div>
+      <div class="chip" id="pre-resp" onclick="loadPreset('resp')"><div class="chip-dot"></div>Respiratory review</div>
+    </div>
+    <div class="field">
+      <label>Clinical dialogue</label>
+      <textarea id="textTranscript" rows="12"></textarea>
+    </div>
+  </div>
+
+  <div class="pipeline" id="pipeline">
+    <div class="p-stage" id="ps0">ASR transcription</div>
+    <div class="p-stage" id="ps1">Speaker diarisation</div>
+    <div class="p-stage" id="ps2">NLP entity extraction</div>
+    <div class="p-stage" id="ps3">SOAP note generation</div>
+  </div>
+
+  <div class="btn-row">
+    <button class="btn btn-primary" id="genBtn" onclick="runPipeline()">Generate clinical note</button>
+    <span id="genSpinner" style="display:none"><div class="spinner"></div></span>
+    <span class="status-msg" id="genMsg"></span>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     NOTE
+══════════════════════════════════════════ -->
+<div id="tab-note" class="panel">
+  <div class="alert alert-warn" id="noteEmpty">
+    <svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 1a7 7 0 100 14A7 7 0 008 1zm0 2a5 5 0 110 10A5 5 0 018 3zm-.75 2.75v2.5h1.5v-2.5h-1.5zm0 3.5v1.5h1.5v-1.5h-1.5z"/></svg>
+    No note generated yet. Go to the Live scribe tab to process an encounter first.
+  </div>
+  <div id="noteContent" style="display:none">
+    <div class="metrics">
+      <div class="m-card"><div class="m-val" id="mn1">—</div><div class="m-lbl">Entities extracted</div></div>
+      <div class="m-card"><div class="m-val" id="mn2">—</div><div class="m-lbl">Negations detected</div></div>
+      <div class="m-card"><div class="m-val" id="mn3">—</div><div class="m-lbl">Medications identified</div></div>
+      <div class="m-card"><div class="m-val" id="mn4">~8 min</div><div class="m-lbl">Est. documentation time saved</div></div>
+    </div>
+
+    <div class="card">
+      <div class="card-head">
+        <div class="card-head-icon"><svg viewBox="0 0 16 16"><path d="M3 2h10v12H3V2zm2 2v1h6V4H5zm0 2v1h6V6H5zm0 2v1h4V8H5z"/></svg></div>
+        Extracted clinical entities
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+        <div>
+          <div class="slabel">Diagnoses / problems</div><div class="etags" id="eDx"></div>
+          <div class="slabel">Reported symptoms</div><div class="etags" id="eSx"></div>
+          <div class="slabel">Denied symptoms</div><div class="etags" id="eNeg"></div>
+        </div>
+        <div>
+          <div class="slabel">Medications</div><div class="etags" id="eMed"></div>
+          <div class="slabel">Allergies</div><div class="etags" id="eAll"></div>
+          <div class="slabel">Vitals &amp; findings</div><div class="etags" id="eVit"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-head">
+        <div class="card-head-icon"><svg viewBox="0 0 16 16"><path d="M2 2h12v12H2V2zm2 2v8h8V4H4zm1 1h6v1H5V5zm0 2h6v1H5V7zm0 2h4v1H5V9z"/></svg></div>
+        SOAP note draft
+        <span style="font-weight:400;font-size:11px;color:var(--gray-400);margin-left:4px">— click any section to edit before signing</span>
+      </div>
+      <div class="note-block">
+        <div class="note-head"><div class="note-head-bar"></div>S — Subjective</div>
+        <div class="note-text" id="ns" contenteditable="true"></div>
+      </div>
+      <div class="note-block">
+        <div class="note-head"><div class="note-head-bar"></div>O — Objective</div>
+        <div class="note-text" id="no" contenteditable="true"></div>
+      </div>
+      <div class="note-block">
+        <div class="note-head"><div class="note-head-bar"></div>A — Assessment <span class="rbadge">physician review required</span></div>
+        <div class="note-text" id="na" contenteditable="true"></div>
+      </div>
+      <div class="note-block">
+        <div class="note-head"><div class="note-head-bar"></div>P — Plan <span class="rbadge">physician review required</span></div>
+        <div class="note-text" id="np" contenteditable="true"></div>
+      </div>
+    </div>
+
+    <div class="sig-box" id="sigBox">
+      <div>
+        <div class="sig-name" id="sigName"></div>
+        <div class="sig-sub" id="sigSub">Awaiting physician sign-off — note is not finalised</div>
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button class="btn" onclick="switchTab('scribe')">Revise transcript</button>
+        <button class="btn btn-success" id="signBtn" onclick="signNote()">Sign &amp; finalise note</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     PASSPORT
+══════════════════════════════════════════ -->
+<div id="tab-passport" class="panel">
+  <div class="alert alert-info">
+    <svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 1a7 7 0 100 14A7 7 0 008 1zm0 2a5 5 0 110 10A5 5 0 018 3zm-.75 2.75v2.5h1.5v-2.5h-1.5zm0 3.5v1.5h1.5v-1.5h-1.5z"/></svg>
+    The medical passport allows patients to share a secure summary with any Mayo Clinic provider using a one-time access code.
+  </div>
+
+  <div class="passport-card">
+    <div class="passport-header">
+      <div class="passport-avatar" id="ppAvatar">JM</div>
+      <div>
+        <div class="passport-name" id="ppName">James Mitchell</div>
+        <div class="passport-meta" id="ppMeta">DOB: 14 Sep 1958 · MRN: MRN-447821 · Male</div>
+      </div>
+      <div style="margin-left:auto;text-align:right">
+        <div style="font-size:10px;color:rgba(255,255,255,0.6);text-transform:uppercase;letter-spacing:0.06em">Mayo Clinic</div>
+        <div style="font-size:12px;color:rgba(255,255,255,0.9);font-weight:600">Medical Passport</div>
+      </div>
+    </div>
+    <div class="passport-body">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px">
+        <div>
+          <div class="passport-section">
+            <div class="slabel">Active conditions</div>
+            <div class="etags" id="ppConds"></div>
+          </div>
+          <div class="passport-section">
+            <div class="slabel">Current medications</div>
+            <div id="ppMeds" style="font-size:13px;line-height:2.0"></div>
+          </div>
+        </div>
+        <div>
+          <div class="passport-section">
+            <div class="slabel">Allergies</div>
+            <div class="etags" id="ppAllergies"></div>
+          </div>
+          <div class="passport-section">
+            <div class="slabel">Recent procedures</div>
+            <div style="font-size:13px;color:var(--gray-600);line-height:1.8">
+              <div>Echocardiogram — Jan 2026</div>
+              <div>Annual lipid panel — Oct 2025</div>
+              <div>BP holter monitor — Jul 2025</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="divider"></div>
+
+      <div class="share-box">
+        <div style="font-size:12px;font-weight:600;color:var(--mayo-navy);margin-bottom:4px">One-time secure access code</div>
+        <div class="share-code" id="shareCode">— — — —</div>
+        <div class="share-sub">Share this code with any Mayo Clinic provider to grant temporary read access to this record summary. Code expires after 24 hours.</div>
+        <div class="btn-row" style="justify-content:center;margin-top:12px">
+          <button class="btn btn-primary" onclick="generateCode()">Generate access code</button>
+          <button class="btn" onclick="switchTab('intake')">Update record</button>
+        </div>
+      </div>
+
+      <div style="font-size:11px;color:var(--gray-400);text-align:center;margin-top:4px">
+        All passport access events are logged and auditable. Patient controls sharing at all times.
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     HISTORY
+══════════════════════════════════════════ -->
+<div id="tab-history" class="panel">
+  <div class="card">
+    <div class="card-head">
+      <div class="card-head-icon"><svg viewBox="0 0 16 16"><path d="M8 8a3 3 0 100-6 3 3 0 000 6zm-5 6a5 5 0 0110 0H3z"/></svg></div>
+      <span id="histHead">Patient record summary</span>
+    </div>
+    <div class="grid4" style="margin-bottom:16px">
+      <div class="field"><label>Date of birth</label><input id="hDob" readonly></div>
+      <div class="field"><label>Age</label><input id="hAge" readonly></div>
+      <div class="field"><label>MRN</label><input id="hId" readonly></div>
+      <div class="field"><label>Gender</label><input id="hGender" readonly></div>
+    </div>
+    <div class="slabel">Active conditions</div>
+    <div class="etags" id="hConds" style="margin-bottom:16px"></div>
+    <div class="grid2">
+      <div>
+        <div class="slabel">Current medications</div>
+        <div id="hMeds" style="font-size:13px;line-height:2.1;color:var(--text)"></div>
+      </div>
+      <div>
+        <div class="slabel">Allergies</div>
+        <div id="hAllergs" style="font-size:13px;color:var(--text);line-height:1.8"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-head">
+      <div class="card-head-icon"><svg viewBox="0 0 16 16"><path d="M2 3h12v1H2zm2 3h8v1H4zm0 3h8v1H4zm0 3h5v1H4z"/></svg></div>
+      Encounter history
+    </div>
+    <div class="hist-row"><span class="hist-date">14 Jan 2026</span><span class="hist-type">Follow-up</span><span class="hist-detail">Hypertension review — BP 152/96. Amlodipine continued, lisinopril added.</span><span class="hist-dr">Dr. S. Chen</span></div>
+    <div class="hist-row"><span class="hist-date">09 Oct 2025</span><span class="hist-type">Follow-up</span><span class="hist-detail">Lipid panel review — LDL 118. Atorvastatin dose increased to 40mg.</span><span class="hist-dr">Dr. S. Chen</span></div>
+    <div class="hist-row"><span class="hist-date">02 Jul 2025</span><span class="hist-type">Urgent</span><span class="hist-detail">Chest discomfort — ECG normal, troponin negative. Musculoskeletal suspected.</span><span class="hist-dr">Dr. R. Patel</span></div>
+    <div class="hist-row"><span class="hist-date">18 Mar 2025</span><span class="hist-type">Telemedicine</span><span class="hist-detail">BP monitoring check — patient reports consistent home readings above target.</span><span class="hist-dr">Dr. S. Chen</span></div>
+    <div class="hist-row"><span class="hist-date">05 Jan 2025</span><span class="hist-type">New patient</span><span class="hist-detail">Initial registration — hypertension and hyperlipidaemia diagnosed. Treatment initiated.</span><span class="hist-dr">Dr. S. Chen</span></div>
+  </div>
+</div>
+
+</div><!-- /main -->
+
+<div class="footer">
+  <strong>Mayo Clinic</strong> · Ambient Clinical Documentation System · Prototype — Demo Mode Only · Do not use with real patient data
+</div>
+
+<script>
+const PRESETS = {
+  htn:`Patient: I've been feeling really tired lately and getting headaches almost daily for three weeks. My home blood pressure has been consistently above 140 over 90.\nClinician: How have you been tolerating the amlodipine we started six months ago?\nPatient: I take the 5 milligrams every morning faithfully, but I don't think it's controlling things well enough.\nClinician: Any chest pain, palpitations, or shortness of breath?\nPatient: No, none of those. No chest pain whatsoever.\nClinician: Any allergic reactions to medications?\nPatient: I'm allergic to penicillin — causes a rash. No others.\nClinician: Your blood pressure today is 148 over 94. With those readings and your symptoms I'd like to escalate therapy. I'm going to add lisinopril 10 milligrams and we'll recheck in four weeks.`,
+  dm:`Patient: My fasting glucose has been between 180 and 210 most mornings. I've not been as careful with my diet lately.\nClinician: Are you still on metformin 1000 milligrams twice daily?\nPatient: Yes, same dose. No gastrointestinal side effects with it.\nClinician: Any hypoglycaemic episodes — shakiness, sweating, confusion?\nPatient: No, no low blood sugar episodes.\nClinician: Any new numbness or tingling in your hands or feet?\nPatient: Some tingling in my left foot over the past six weeks actually.\nClinician: Your HbA1c today is 8.4 percent, up from 7.9 three months ago. The peripheral symptoms concern me. I'd like to add a GLP-1 receptor agonist and refer you to endocrinology for closer management.`,
+  cp:`Patient: I had severe chest tightness two days ago climbing two flights of stairs. It lasted about six minutes and went away when I sat down.\nClinician: Can you describe the quality of the pain? Was it crushing, pressure, sharp?\nPatient: Heavy pressure, like something was sitting on my chest. It radiated into my left arm.\nClinician: Any associated breathlessness or diaphoresis?\nPatient: Yes, I was very short of breath and broke out in a cold sweat. It frightened me.\nClinician: Any family history of cardiac disease?\nPatient: My father had a heart attack at 59 and my brother had a stent placed at 64.\nClinician: Your ECG today shows normal sinus rhythm with no acute changes. Troponin is pending. Given the exertional nature, radiation, and strong family history, I'm treating this as an ACS rule-out. Admitting for serial troponins and cardiology review.`,
+  resp:`Patient: I've been waking up at night wheezing and short of breath two or three times a week. My rescue inhaler is barely helping.\nClinician: How long has this been happening?\nPatient: About three weeks. It's getting worse. I've been using my salbutamol inhaler almost every day.\nClinician: Any triggers you've noticed? Cold air, exercise, allergens?\nPatient: Definitely worse with exercise and in the cold. I have a cat at home.\nClinician: Any fever, productive cough, or recent upper respiratory infection?\nPatient: No fever. Dry cough occasionally but no chest infection.\nClinician: Your peak flow today is 68 percent of predicted. Spirometry shows an FEV1/FVC ratio of 0.68. This is consistent with poorly controlled asthma. I'm starting you on an inhaled corticosteroid and referring you to pulmonology.`
+};
+
+let mode='mic',isRec=false,recSecs=0,recInt=null,waveInt=null,mediaRec=null,audioChunks=[],recognition=null;
+
+document.getElementById('topDate').textContent=new Date().toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+document.getElementById('encNum').textContent=Math.floor(1000+Math.random()*8999);
+
+function switchTab(name){
+  const tabs=['intake','scribe','note','passport','history'];
+  tabs.forEach((t,i)=>{
+    document.getElementById('tab-'+t).classList.toggle('visible',t===name);
+    document.querySelectorAll('.tab')[i].classList.toggle('active',t===name);
+  });
+  if(name==='history') fillHistory();
+  if(name==='passport') fillPassport();
+}
+
+function setMode(m){
+  mode=m;
+  ['mic','upload','text'].forEach(x=>{
+    document.getElementById('mt-'+x).classList.toggle('active',x===m);
+    document.getElementById('mp-'+x).style.display=x===m?'':'none';
+  });
+}
+
+function loadPreset(k){
+  document.querySelectorAll('#mp-text .chip').forEach(c=>c.classList.remove('sel'));
+  document.getElementById('pre-'+k).classList.add('sel');
+  document.getElementById('textTranscript').value=PRESETS[k];
+}
+loadPreset('htn');
+
+function toggleRec(){isRec?stopRec():startRec();}
+
+function startRec(){
+  if(!navigator.mediaDevices){document.getElementById('recStatus').textContent='Microphone unavailable — use the text input tab instead.';return;}
+  navigator.mediaDevices.getUserMedia({audio:true}).then(stream=>{
+    isRec=true;recSecs=0;audioChunks=[];
+    document.getElementById('recBtn').className='rec-btn rec-live';
+    document.getElementById('recStatus').textContent='Recording in progress — speak clearly near your microphone';
+    mediaRec=new MediaRecorder(stream);
+    mediaRec.ondataavailable=e=>audioChunks.push(e.data);
+    mediaRec.start();
+    recInt=setInterval(()=>{
+      recSecs++;
+      document.getElementById('recTimer').textContent=String(Math.floor(recSecs/60)).padStart(2,'0')+':'+String(recSecs%60).padStart(2,'0');
+    },1000);
+    waveInt=setInterval(()=>{for(let i=1;i<=11;i++)document.getElementById('w'+i).style.height=(Math.random()*26+4)+'px';},120);
+    if('webkitSpeechRecognition'in window||'SpeechRecognition'in window){
+      const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+      recognition=new SR();recognition.continuous=true;recognition.interimResults=true;
+      let final='';
+      recognition.onresult=e=>{
+        let interim='';
+        for(let i=e.resultIndex;i<e.results.length;i++){
+          if(e.results[i].isFinal)final+=e.results[i][0].transcript+' ';
+          else interim=e.results[i][0].transcript;
+        }
+        document.getElementById('micTranscript').value=final+interim;
+      };
+      recognition.start();
+    }
+  }).catch(()=>document.getElementById('recStatus').textContent='Microphone access denied — use the text input tab instead.');
+}
+
+function stopRec(){
+  isRec=false;clearInterval(recInt);clearInterval(waveInt);
+  document.getElementById('recBtn').className='rec-btn rec-idle';
+  document.getElementById('recStatus').textContent='Recording stopped — ready to generate note';
+  for(let i=1;i<=11;i++)document.getElementById('w'+i).style.height='8px';
+  if(mediaRec)mediaRec.stop();
+  if(recognition)recognition.stop();
+}
+
+function handleUpload(input){
+  if(!input.files.length)return;
+  document.getElementById('uploadMsg').textContent='File loaded: '+input.files[0].name+' — paste the encounter transcript below, then click Generate clinical note.';
+}
+
+function getTranscript(){
+  if(mode==='mic')return document.getElementById('micTranscript').value;
+  if(mode==='upload')return document.getElementById('uploadTranscript').value;
+  return document.getElementById('textTranscript').value;
+}
+
+async function runPipeline(){
+  const t=getTranscript().trim();
+  if(!t||t.length<20){document.getElementById('genMsg').textContent='Please provide encounter dialogue first.';return;}
+  const btn=document.getElementById('genBtn');
+  btn.disabled=true;
+  document.getElementById('genSpinner').style.display='inline-block';
+  document.getElementById('genMsg').textContent='';
+  const stages=['ps0','ps1','ps2','ps3'];
+  const msgs=['Transcribing audio...','Separating speakers...','Extracting clinical entities...','Generating SOAP note...'];
+  async function tick(i){
+    stages.forEach(id=>document.getElementById(id).classList.remove('active'));
+    if(i>0)document.getElementById(stages[i-1]).classList.add('done');
+    document.getElementById(stages[i]).classList.add('active');
+    document.getElementById('genMsg').textContent=msgs[i];
+    await new Promise(r=>setTimeout(r,700));
+  }
+  const ptName=(document.getElementById('ptFirst').value+' '+document.getElementById('ptLast').value).trim();
+  const clin=document.getElementById('clinician').value||'the physician';
+  const spec=document.getElementById('specialty').value;
+  const cc=document.getElementById('complaint').value;
+  const dept=document.getElementById('dept').value;
+  try{
+    await tick(0);await tick(1);await tick(2);await tick(3);
+    const prompt=`You are an AI clinical documentation assistant at ${dept}. Analyze this ${spec} encounter for patient ${ptName}, presenting with: ${cc}. Attending physician: ${clin}.\n\nDialogue:\n"""\n${t}\n"""\n\nReturn ONLY valid JSON, no markdown:\n{"entities":{"diagnoses":[],"symptoms":[],"negations":[],"medications":[],"allergies":[],"vitals":[]},"soap":{"subjective":"2-3 sentences in formal clinical language summarising the patient's history and presenting complaint","objective":"1-2 sentences with examination findings and measured data","assessment":"1-2 sentences with primary diagnosis and clinical reasoning","plan":"2-3 sentences with management plan, follow-up, and any referrals"}}`;
+    const res=await fetch('/api/claude',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1200,messages:[{role:'user',content:prompt}]})
+    });
+    const data=await res.json();
+    const parsed=JSON.parse(data.content.map(b=>b.text||'').join('').replace(/```json|```/g,'').trim());
+    stages.forEach(id=>{document.getElementById(id).classList.remove('active');document.getElementById(id).classList.add('done');});
+    renderNote(parsed,ptName,clin);
+    document.getElementById('genMsg').textContent='Note generated — opening review tab...';
+    document.getElementById('noteBadge').textContent='ready';
+    document.getElementById('encStatus').textContent='Note ready';
+    document.getElementById('encStatus').className='status-pill s-draft';
+    setTimeout(()=>switchTab('note'),800);
+  }catch(e){
+    stages.forEach(id=>document.getElementById(id).classList.remove('active','done'));
+    document.getElementById('genMsg').textContent='Error generating note — check API configuration and try again.';
+  }finally{
+    btn.disabled=false;
+    document.getElementById('genSpinner').style.display='none';
+  }
+}
+
+function tag(text,cls){return`<span class="etag ${cls}">${text}</span>`;}
+
+function renderNote(parsed,ptName,clin){
+  document.getElementById('noteEmpty').style.display='none';
+  document.getElementById('noteContent').style.display='block';
+  const e=parsed.entities;
+  const total=Object.values(e).flat().filter(x=>x&&x!=='NKDA').length;
+  document.getElementById('mn1').textContent=total;
+  document.getElementById('mn2').textContent=(e.negations||[]).length;
+  document.getElementById('mn3').textContent=(e.medications||[]).length;
+  const fill=(id,arr,cls)=>{document.getElementById(id).innerHTML=arr&&arr.length?arr.map(x=>tag(x,cls)).join(''):tag('None recorded','etag-neg');};
+  fill('eDx',e.diagnoses,'etag-dx');fill('eSx',e.symptoms,'etag-sx');
+  fill('eNeg',(e.negations||[]).map(x=>'✕ '+x),'etag-neg');
+  fill('eMed',e.medications,'etag-med');fill('eAll',e.allergies,'etag-all');fill('eVit',e.vitals,'etag-vit');
+  document.getElementById('ns').textContent=parsed.soap.subjective;
+  document.getElementById('no').textContent=parsed.soap.objective;
+  document.getElementById('na').textContent=parsed.soap.assessment;
+  document.getElementById('np').textContent=parsed.soap.plan;
+  document.getElementById('sigName').textContent=clin;
+  document.getElementById('sigSub').textContent='Awaiting physician sign-off · '+new Date().toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric',hour:'2-digit',minute:'2-digit'});
+}
+
+function signNote(){
+  const clin=document.getElementById('clinician').value||'Physician';
+  const now=new Date().toLocaleString('en-US',{month:'long',day:'numeric',year:'numeric',hour:'2-digit',minute:'2-digit'});
+  document.getElementById('sigBox').innerHTML=`<div><div class="sig-name">${clin}</div><div class="sig-sub">Signed &amp; finalised · ${now} · Note submitted to EHR</div></div><span class="signed-stamp">Note finalised</span>`;
+  document.getElementById('noteBadge').textContent='signed';
+  document.getElementById('encStatus').textContent='Completed';
+  document.getElementById('encStatus').className='status-pill s-done';
+  document.querySelectorAll('.note-text').forEach(el=>el.setAttribute('contenteditable','false'));
+}
+
+function fillHistory(){
+  const dob=document.getElementById('ptDob').value;
+  const first=document.getElementById('ptFirst').value;
+  const last=document.getElementById('ptLast').value;
+  document.getElementById('histHead').textContent=(first+' '+last).trim()||'Patient record';
+  if(dob){
+    const age=Math.floor((new Date()-new Date(dob))/(365.25*24*3600*1000));
+    document.getElementById('hDob').value=new Date(dob).toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'});
+    document.getElementById('hAge').value=age+' years';
+  }
+  document.getElementById('hId').value=document.getElementById('ptId').value;
+  document.getElementById('hGender').value=document.getElementById('ptGender').value;
+  const conds=[...document.querySelectorAll('#condChips .chip.sel')].map(c=>c.textContent.trim());
+  document.getElementById('hConds').innerHTML=conds.map(c=>`<span class="etag etag-dx">${c}</span>`).join('')||'<span style="color:var(--gray-400);font-size:13px">None recorded</span>';
+  const meds=document.getElementById('meds').value.trim().split('\n').filter(Boolean);
+  document.getElementById('hMeds').innerHTML=meds.map(m=>`<div style="border-bottom:1px solid var(--gray-100);padding:3px 0">${m}</div>`).join('')||'—';
+  document.getElementById('hAllergs').textContent=document.getElementById('allergies').value||'—';
+}
+
+function fillPassport(){
+  const first=document.getElementById('ptFirst').value;
+  const last=document.getElementById('ptLast').value;
+  const dob=document.getElementById('ptDob').value;
+  const id=document.getElementById('ptId').value;
+  const gender=document.getElementById('ptGender').value;
+  const initials=((first[0]||'')+(last[0]||'')).toUpperCase();
+  document.getElementById('ppAvatar').textContent=initials||'?';
+  document.getElementById('ppName').textContent=(first+' '+last).trim()||'Patient';
+  let dobStr='';
+  if(dob){
+    const age=Math.floor((new Date()-new Date(dob))/(365.25*24*3600*1000));
+    dobStr='DOB: '+new Date(dob).toLocaleDateString('en-US',{day:'numeric',month:'short',year:'numeric'})+' ('+age+' yrs)';
+  }
+  document.getElementById('ppMeta').textContent=dobStr+' · '+id+' · '+gender;
+  const conds=[...document.querySelectorAll('#condChips .chip.sel')].map(c=>c.textContent.trim());
+  document.getElementById('ppConds').innerHTML=conds.map(c=>`<span class="etag etag-dx">${c}</span>`).join('')||'<span style="color:var(--gray-400);font-size:13px">None recorded</span>';
+  const meds=document.getElementById('meds').value.trim().split('\n').filter(Boolean);
+  document.getElementById('ppMeds').innerHTML=meds.map(m=>`<div style="border-bottom:1px solid var(--gray-100);padding:2px 0">${m}</div>`).join('')||'—';
+  const allergies=document.getElementById('allergies').value.trim().split('\n').filter(Boolean);
+  document.getElementById('ppAllergies').innerHTML=allergies.map(a=>`<span class="etag etag-all">${a}</span>`).join('')||tag('NKDA','etag-neg');
+}
+
+function generateCode(){
+  const chars='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  const code=Array.from({length:4},()=>chars[Math.floor(Math.random()*chars.length)]).join(' ');
+  document.getElementById('shareCode').textContent=code;
+}
+</script>
+</body>
+</html>
